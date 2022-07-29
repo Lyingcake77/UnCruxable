@@ -22,6 +22,7 @@ import (
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	testCode()
 
+
 	lc, ok := lambdacontext.FromContext(ctx)
 	if !ok {
 		return &events.APIGatewayProxyResponse{
@@ -31,7 +32,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*event
 	}
 
 	cc := lc.ClientContext
-
+	//return key
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Body:       "Hello, " + cc.Client.AppTitle,
@@ -78,7 +79,6 @@ func testCode() {
 		{"weight", ""}, // ignore weight if null
 		{"gender", ""},
 		{"experience", ""},
-		{"gender", ""},
 		{"favoriteEmoji/ profileEmoji", ""},
 		{"afterHoursMatching", ""},
 
@@ -92,7 +92,7 @@ func testCode() {
 		{"availableUntil", ""},
 		{"AuthenticationToken", ""},
 		{"userMatchExpiration", ""},//we dont want to match people to more than 1 person
-		{"reportedCount", ""},//anyone over X amount of reports will be shadow banned
+		{"reportedCount", ""},//anyone over X amount of reports will be shadow banned, array of complaints
 	}
 	coll.InsertOne(context.TODO(), doc)
 	// if err != nil {

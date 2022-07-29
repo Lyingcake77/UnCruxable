@@ -13,6 +13,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*event
 	//get user
 	//set checkin Time to now + horus planning to stay
 	//find user based requirements
+	//add table to get history of all matches
 	
 	lc, ok := lambdacontext.FromContext(ctx)
 	if !ok {
