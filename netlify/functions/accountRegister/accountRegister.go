@@ -60,10 +60,40 @@ func testCode() {
 		}
 	}()
 
-	coll := mongoClient.Database("twoPlayerBelayer").Collection("movies")
+	//check phone number for duplicates; throw error if true
+	//Insert new record;
+	//return authentication/ text magic link
 
-	title := "Record of a Shriveled Datum"
-	doc := bson.D{{"title", title}, {"text", "No bytes, no problem. Just insert a document, in MongoDB"}}
+	coll := mongoClient.Database("twoPlayerBelayer").Collection("users")
+
+	doc := bson.D{
+		{"preferedName", ""},
+		{"IAmOver18", ""},
+		{"phone", ""},
+		{"belayCertified", ""},
+
+		{"pronouns", ""},
+		{"apeSpan", ""},
+		{"height", ""},
+		{"weight", ""}, // ignore weight if null
+		{"gender", ""},
+		{"experience", ""},
+		{"gender", ""},
+		{"favoriteEmoji/ profileEmoji", ""},
+		{"afterHoursMatching", ""},
+
+		{"preferedRangeMaxWeight", ""},
+		{"preferedGenderMaybe?", ""},
+		{"preferedExperience", ""},
+		{"disregardFlag", ""},//ignore this and set the above as any
+
+		//automagically set
+		{"lastCheckIn", ""},
+		{"availableUntil", ""},
+		{"AuthenticationToken", ""},
+		{"userMatchExpiration", ""},//we dont want to match people to more than 1 person
+		{"reportedCount", ""},//anyone over X amount of reports will be shadow banned
+	}
 	coll.InsertOne(context.TODO(), doc)
 	// if err != nil {
 	// 	panic(err)

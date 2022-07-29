@@ -9,6 +9,11 @@ import (
 )
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	//verify token
+	//get user
+	//set checkin Time to now + horus planning to stay
+	//find user based requirements
+	
 	lc, ok := lambdacontext.FromContext(ctx)
 	if !ok {
 	  return &events.APIGatewayProxyResponse{
