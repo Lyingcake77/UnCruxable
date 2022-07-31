@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 
 	"fmt"
 	"log"
@@ -19,23 +20,50 @@ import (
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
+type user struct {
+	phone              string
+	preferedName       string
+	IAmOver18          bool
+	belayCertified     bool
+	pronouns           string
+	apeSpan            int
+	height             int
+	weight             int
+	experience         string
+	favoriteEmoji      string
+	afterHoursMatching bool
+
+	preferedRangeMaxWeight int
+	preferedBelayCertified bool
+	preferedExperience     string
+	disregardFlag          bool
+
+	//automagically set
+	lastCheckIn         string //time.Date
+	availableUntil      string //time.Date
+	AuthenticationToken string
+	userMatchExpiration string //time.Date
+	reportedCount       int
+}
+
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	testCode()
+	authenticationResult, err := register(request.Body)
 
+	_, ok := lambdacontext.FromContext(ctx)
 
-	lc, ok := lambdacontext.FromContext(ctx)
 	if !ok {
 		return &events.APIGatewayProxyResponse{
 			StatusCode: 503,
-			Body:       "Something went wrong :(",
+			Body:       err.Error(),
 		}, nil
 	}
 
-	cc := lc.ClientContext
+	//cc := lc.ClientContext
+
 	//return key
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       "Hello, " + cc.Client.AppTitle,
+		Body:       authenticationResult,
 	}, nil
 }
 
@@ -44,7 +72,12 @@ func main() {
 
 }
 
-func testCode() {
+func register(body string) (string, error) {
+
+	target := user{}
+	input := []byte(body)
+	json.Unmarshal(input, &target)
+	//	json.NewDecoder(body).Decode(target)
 
 	uri := os.Getenv("CONNECTION_STRING")
 	if uri == "" {
@@ -61,51 +94,30 @@ func testCode() {
 		}
 	}()
 
-	//check phone number for duplicates; throw error if true
-	//Insert new record;
-	//return authentication/ text magic link
-
 	coll := mongoClient.Database("twoPlayerBelayer").Collection("users")
 
-	doc := bson.D{
-		{"preferedName", ""},
-		{"IAmOver18", ""},
-		{"phone", ""},
-		{"belayCertified", ""},
-
-		{"pronouns", ""},
-		{"apeSpan", ""},
-		{"height", ""},
-		{"weight", ""}, // ignore weight if null
-		{"gender", ""},
-		{"experience", ""},
-		{"favoriteEmoji/ profileEmoji", ""},
-		{"afterHoursMatching", ""},
-
-		{"preferedRangeMaxWeight", ""},
-		{"preferedGenderMaybe?", ""},
-		{"preferedExperience", ""},
-		{"disregardFlag", ""},//ignore this and set the above as any
-
-		//automagically set
-		{"lastCheckIn", ""},
-		{"availableUntil", ""},
-		{"AuthenticationToken", ""},
-		{"userMatchExpiration", ""},//we dont want to match people to more than 1 person
-		{"reportedCount", ""},//anyone over X amount of reports will be shadow banned, array of complaints
-	}
-	coll.InsertOne(context.TODO(), doc)
-	// if err != nil {
-	// 	panic(err)
-	// }
 	//TEXT
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{
 		Username: os.Getenv("TWILIO_ACCOUNT_SID"),
 		Password: os.Getenv("TWILIO_AUTH_TOKEN"),
 	})
+	result2 := ""
+	//check phone number for duplicates; throw error if true
+	err = coll.FindOne(context.TODO(), bson.D{{"phone", 5}}).Decode(&result2)
+	if result2 != "" {
+		panic("user exists")
+	}
+
+	//Insert new record;
+	//return authentication/ text magic link
+
+	coll.InsertOne(context.TODO(), target)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	params := &openapi.CreateMessageParams{}
-	params.SetTo(os.Getenv("TWILIO_TO_PHONE"))
+	params.SetTo("+1" + target.phone)
 	params.SetFrom(os.Getenv("TWILIO_FROM_PHONE"))
 	params.SetBody("test")
 
@@ -116,4 +128,5 @@ func testCode() {
 	} else {
 		fmt.Println("Message Sid: " + *resp.Sid)
 	}
+	return "Authentication String", nil
 }
