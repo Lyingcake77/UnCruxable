@@ -23,7 +23,7 @@ import (
 type user struct {
 	phone              string
 	preferedName       string
-	IAmOver18          bool
+	iAmOver18          bool
 	belayCertified     bool
 	pronouns           string
 	apeSpan            int
