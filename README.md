@@ -16,7 +16,7 @@ Go Back end
 * twilio for texting
 * ability to subscribe with Phone #
 + request name, age/ 18+/ 13+, or legal thing about age, phone, want notifications aftern hours, 
-++ optional: wingspan, height, est weight class, experience/ average grade, pronouns, belsay certified, lookingh for belayer
+++ optional: wingspan, height, est weight class, experience/ average grade, pronouns, belsay certified, looking for belayer
 ++ scheduling options/ outside of hours option 
 ++ magic passwordless links for logging in
 

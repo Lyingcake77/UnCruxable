@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
-
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -103,13 +103,15 @@ func register(body string) (string, error) {
 	})
 	result2 := ""
 	//check phone number for duplicates; throw error if true
-	err = coll.FindOne(context.TODO(), bson.D{{"phone", 5}}).Decode(&result2)
+	err = coll.FindOne(context.TODO(), bson.D{{"phone", target.phone}}).Decode(&result2)
 	if result2 != "" {
 		panic("user exists")
 	}
 
 	//Insert new record;
 	//return authentication/ text magic link
+	magicKey := uuid.New().String()
+	target.AuthenticationToken = magicKey
 
 	coll.InsertOne(context.TODO(), target)
 	// if err != nil {
@@ -119,7 +121,13 @@ func register(body string) (string, error) {
 	params := &openapi.CreateMessageParams{}
 	params.SetTo("+1" + target.phone)
 	params.SetFrom(os.Getenv("TWILIO_FROM_PHONE"))
-	params.SetBody("test")
+
+	//magic link will be the access token for now. and it will be forever for now.
+	//TODO: reset this magic key and handle proper authentication
+
+	//this will redirect to our client and this will save the magic key
+	magicLink := "https://myClientSite/id?=" + magicKey
+	params.SetBody("Your phone number has been registered with two player belayer. Please open this link to complete registration. " + magicLink)
 
 	resp, err := client.Api.CreateMessage(params)
 	if err != nil {

@@ -10,6 +10,10 @@ import (
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	//verify token
+	//get phone and magicKey
+	//Access DB, get user by phone and magicKey
+	//return data
+
 	//return data
 	lc, ok := lambdacontext.FromContext(ctx)
 	if !ok {
